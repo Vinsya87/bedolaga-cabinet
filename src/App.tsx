@@ -116,6 +116,10 @@ const AdminLandings = lazy(() => import('./pages/AdminLandings'));
 const AdminLandingEditor = lazy(() => import('./pages/AdminLandingEditor'));
 const AdminLandingStats = lazy(() => import('./pages/AdminLandingStats'));
 const AdminReferralNetwork = lazy(() => import('./pages/ReferralNetwork'));
+const AdminSeoSettings = lazy(() => import('./pages/AdminSeoSettings'));
+// [CODELOFT CUSTOM] Кастомная страница CSS редактора и Панель CodeLoft
+const AdminCustomCssSettings = lazy(() => import('./pages/AdminCustomCssSettings'));
+const CodeLoftPanel = lazy(() => import('./pages/CodeLoftPanel'));
 
 // News pages
 const NewsArticlePage = lazy(() => import('./pages/NewsArticle'));
@@ -621,6 +625,37 @@ function App() {
             <PermissionRoute permission="landings:read">
               <LazyPage>
                 <AdminLandingStats />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        {/* [CODELOFT CUSTOM] Изолированные роуты для кастомных фич */}
+        <Route
+          path="/codeloft"
+          element={
+            <AdminRoute>
+              <LazyPage>
+                <CodeLoftPanel />
+              </LazyPage>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/codeloft/seo"
+          element={
+            <PermissionRoute permission="settings:read">
+              <LazyPage>
+                <AdminSeoSettings />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/codeloft/custom-css"
+          element={
+            <PermissionRoute permission="settings:read">
+              <LazyPage>
+                <AdminCustomCssSettings />
               </LazyPage>
             </PermissionRoute>
           }

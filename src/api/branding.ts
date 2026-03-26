@@ -44,6 +44,10 @@ export interface AnalyticsCounters {
   google_ads_label: string;
 }
 
+export interface CustomCss {
+  css: string;
+}
+
 const BRANDING_CACHE_KEY = 'cabinet_branding';
 const LOGO_PRELOADED_KEY = 'cabinet_logo_preloaded';
 
@@ -301,6 +305,22 @@ export const brandingApi = {
   // Update analytics counters (admin only)
   updateAnalyticsCounters: async (data: Partial<AnalyticsCounters>): Promise<AnalyticsCounters> => {
     const response = await apiClient.patch<AnalyticsCounters>('/cabinet/branding/analytics', data);
+    return response.data;
+  },
+
+  // Get custom CSS (public)
+  getCustomCss: async (): Promise<CustomCss> => {
+    try {
+      const response = await apiClient.get<CustomCss>('/cabinet/branding/custom-css');
+      return response.data;
+    } catch {
+      return { css: '' };
+    }
+  },
+
+  // Update custom CSS (admin only)
+  updateCustomCss: async (css: string): Promise<CustomCss> => {
+    const response = await apiClient.put<CustomCss>('/cabinet/branding/custom-css', { css });
     return response.data;
   },
 };

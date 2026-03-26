@@ -1,11 +1,108 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 import packageJson from './package.json';
+
+function seoInjector() {
+  return {
+    name: 'seo-injector',
+    async transformIndexHtml(html: string) {
+      try {
+        let seoData: any = null;
+        try {
+          // Пытаемся получить актуальные настройки из базы данных во время сборки/запуска
+          const res = await fetch('http://127.0.0.1:8080/webapi/seo/current');
+          if (res.ok) {
+            seoData = await res.json();
+          }
+        } catch (fetchErr) {
+          console.log('[seo-injector] API недоступно, используются базовые теги.');
+        }
+
+        if (seoData && (seoData.title || seoData.description || seoData.og_image_url)) {
+          let modifiedHtml = html;
+
+          if (seoData.title) {
+            modifiedHtml = modifiedHtml.replace(
+              /<title>.*?<\/title>/gi,
+              `<title>${seoData.title}</title>`,
+            );
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+name=["']title["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+property=["']og:title["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+property=["']twitter:title["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+
+            const newTitleTags = [
+              `<meta name="title" content="${seoData.title}" />`,
+              `<meta property="og:title" content="${seoData.title}" />`,
+              `<meta property="twitter:title" content="${seoData.title}" />`,
+            ].join('\n  ');
+            modifiedHtml = modifiedHtml.replace('</head>', `  ${newTitleTags}\n</head>`);
+          }
+
+          if (seoData.description) {
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+name=["']description["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+property=["']og:description["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+property=["']twitter:description["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+
+            const newDescTags = [
+              `<meta name="description" content="${seoData.description}" />`,
+              `<meta property="og:description" content="${seoData.description}" />`,
+              `<meta property="twitter:description" content="${seoData.description}" />`,
+            ].join('\n  ');
+            modifiedHtml = modifiedHtml.replace('</head>', `  ${newDescTags}\n</head>`);
+          }
+
+          if (seoData.og_image_url) {
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+property=["']og:image["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+            modifiedHtml = modifiedHtml.replace(
+              /<meta\s+property=["']twitter:image["']\s+content=["'][^"']*["']\s*\/?>/gi,
+              '',
+            );
+
+            const newImgTags = [
+              `<meta property="og:image" content="${seoData.og_image_url}" />`,
+              `<meta property="twitter:image" content="${seoData.og_image_url}" />`,
+            ].join('\n  ');
+            modifiedHtml = modifiedHtml.replace('</head>', `  ${newImgTags}\n</head>`);
+          }
+
+          modifiedHtml = modifiedHtml.replace('<!-- SEO_TAGS_PLACEHOLDER -->', '');
+
+          return modifiedHtml;
+        }
+      } catch (e) {
+        console.error('SEO Injector error:', e);
+      }
+      return html;
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [seoInjector(), react()],
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },

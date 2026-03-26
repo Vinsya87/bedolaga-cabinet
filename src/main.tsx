@@ -85,6 +85,33 @@ if ('requestIdleCallback' in window) {
   setTimeout(initLogoPreload, 100);
 }
 
+// [CODELOFT CUSTOM] Инъекция кастомных стилей из БД
+function injectCustomCss() {
+  try {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8080/webapi';
+    fetch(`${apiUrl}/seo/custom-css`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+      })
+      .then((data) => {
+        if (data.css_code) {
+          let styleEl = document.getElementById('codeloft-custom-css');
+          if (!styleEl) {
+            styleEl = document.createElement('style');
+            styleEl.id = 'codeloft-custom-css';
+            document.head.appendChild(styleEl);
+          }
+          styleEl.innerHTML = data.css_code;
+        }
+      })
+      .catch((err) => console.error('Failed to load custom CSS:', err));
+  } catch (e) {
+    console.warn('Silent fail Custom CSS fetching', e);
+  }
+}
+injectCustomCss();
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

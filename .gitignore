@@ -48,3 +48,6 @@ miniapp/
 .ai/
 CLAUDE.md
 **/CLAUDE.md
+
+# Dynamic SEO content
+public/seo_data.json

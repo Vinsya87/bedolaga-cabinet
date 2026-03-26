@@ -40,6 +40,19 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     queryFn: brandingApi.getGiftEnabled,
   });
 
+  const { data: customCss } = useQuery({
+    queryKey: ['custom-css'],
+    queryFn: brandingApi.getCustomCss,
+  });
+
+  const [cssValue, setCssValue] = useState<string>('');
+  const [isCssEditing, setIsCssEditing] = useState(false);
+
+  // Sync css value when loaded
+  if (customCss?.css !== undefined && !isCssEditing && cssValue !== customCss.css) {
+    setCssValue(customCss.css);
+  }
+
   // Mutations
   const updateBrandingMutation = useMutation({
     mutationFn: brandingApi.updateName,
@@ -85,6 +98,13 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     mutationFn: (enabled: boolean) => brandingApi.updateGiftEnabled(enabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gift-enabled'] });
+    },
+  });
+
+  const updateCssMutation = useMutation({
+    mutationFn: (css: string) => brandingApi.updateCustomCss(css),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['custom-css'] });
     },
   });
 
@@ -250,6 +270,48 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
             />
           </div>
         </div>
+      </div>
+
+      {/* Пользовательский CSS */}
+      <div className="rounded-2xl border border-dark-700/50 bg-dark-800/50 p-6">
+        <h3 className="mb-4 flex items-center justify-between text-lg font-semibold text-dark-100">
+          <span>{t('admin.settings.customCss') || 'Собственные стили (CSS)'}</span>
+          <button
+            onClick={() => {
+              updateCssMutation.mutate(cssValue);
+              setIsCssEditing(false);
+            }}
+            disabled={updateCssMutation.isPending}
+            className="flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+          >
+            <CheckIcon />
+            {t('admin.actions.save') || 'Сохранить'}
+          </button>
+        </h3>
+        <p className="mb-4 text-sm text-dark-400">
+          Максимальная кастомизация. Вставьте любой CSS код, он будет применен ко всему интерфейсу
+          напрямую. Будьте осторожны, можно сломать верстку! Изменения применяются после сохранения.
+        </p>
+
+        <textarea
+          value={cssValue}
+          onChange={(e) => {
+            setCssValue(e.target.value);
+            setIsCssEditing(true);
+          }}
+          placeholder="/* Пример: убрать закругление у кнопок */
+.rounded-xl {
+  border-radius: 0 !important;
+}
+
+/* Изменить фон на всей странице */
+body {
+  background-color: #000 !important;
+}"
+          rows={8}
+          className="w-full rounded-xl border border-dark-600 bg-dark-900/50 px-4 py-3 font-mono text-sm text-accent-300 placeholder-dark-600 outline-none transition-colors focus:border-accent-500 focus:bg-dark-900"
+          spellCheck={false}
+        />
       </div>
     </div>
   );
