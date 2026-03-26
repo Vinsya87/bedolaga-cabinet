@@ -73,6 +73,52 @@ export function useBranding() {
     }
   }, [fullscreenSetting, isTelegramWebApp, requestFullscreen, isMobile]);
 
+  // ── SEO: динамическое обновление мета-тегов из API ──
+  useEffect(() => {
+    const applySeoTags = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const res = await fetch(`${apiUrl}/seo/current`);
+        if (!res.ok) return;
+        const seo: { title: string; description: string; og_image_url: string } = await res.json();
+
+        // Хелпер: обновить или создать <meta> тег
+        const setMeta = (selector: string, content: string) => {
+          if (!content) return;
+          let el = document.querySelector<HTMLMetaElement>(selector);
+          if (el) {
+            el.setAttribute('content', content);
+          } else {
+            el = document.createElement('meta');
+            // Парсим атрибут из селектора, например: 'meta[property="og:title"]'
+            const propMatch = selector.match(/\[(\w+)="([^"]+)"\]/);
+            if (propMatch) el.setAttribute(propMatch[1], propMatch[2]);
+            el.setAttribute('content', content);
+            document.head.appendChild(el);
+          }
+        };
+
+        if (seo.title) {
+          setMeta('meta[name="title"]', seo.title);
+          setMeta('meta[property="og:title"]', seo.title);
+          setMeta('meta[property="twitter:title"]', seo.title);
+        }
+        if (seo.description) {
+          setMeta('meta[name="description"]', seo.description);
+          setMeta('meta[property="og:description"]', seo.description);
+          setMeta('meta[property="twitter:description"]', seo.description);
+        }
+        if (seo.og_image_url) {
+          setMeta('meta[property="og:image"]', seo.og_image_url);
+          setMeta('meta[property="twitter:image"]', seo.og_image_url);
+        }
+      } catch {
+        // SEO не загрузились — не критично, используем значения из HTML
+      }
+    };
+    applySeoTags();
+  }, []);
+
   return {
     appName,
     logoLetter,
