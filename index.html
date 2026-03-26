@@ -31,6 +31,24 @@
   <meta property="twitter:description" content="">
   <meta property="og:image" content="/og-image.webp">
   <meta property="twitter:image" content="/og-image.webp">
+  <script>
+    // SEO: подтягиваем мета-теги из БД через API (работает на ЛЮБОЙ странице, включая /login)
+    (function(){
+      var api = '/api/seo/current';
+      fetch(api).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
+        if(!d) return;
+        function s(q,v){ if(!v) return; var e=document.querySelector(q); if(e) e.setAttribute('content',v); }
+        s('meta[name="title"]',d.title);
+        s('meta[property="og:title"]',d.title);
+        s('meta[property="twitter:title"]',d.title);
+        s('meta[name="description"]',d.description);
+        s('meta[property="og:description"]',d.description);
+        s('meta[property="twitter:description"]',d.description);
+        if(d.og_image_url){ s('meta[property="og:image"]',d.og_image_url); s('meta[property="twitter:image"]',d.og_image_url); }
+        if(d.title) document.title = d.title;
+      }).catch(function(){});
+    })();
+  </script>
 </head>
   <body>
     <div id="root"></div>
