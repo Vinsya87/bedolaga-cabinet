@@ -32,8 +32,10 @@
   <meta property="og:image" content="/og-image.webp">
   <meta property="twitter:image" content="/og-image.webp">
   <script>
-    // SEO: подтягиваем мета-теги из БД через API (работает на ЛЮБОЙ странице, включая /login)
+    // SEO: подтягиваем мета-теги из БД (только на боевом сервере, НЕ на localhost)
     (function(){
+      var h = location.hostname;
+      if(h === 'localhost' || h === '127.0.0.1') return;
       var api = '/api/seo/current';
       fetch(api).then(function(r){ return r.ok ? r.json() : null; }).then(function(d){
         if(!d) return;
