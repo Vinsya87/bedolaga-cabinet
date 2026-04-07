@@ -408,13 +408,7 @@ export default function Login() {
             <p className="mb-5 text-xs text-dark-500">
               {t(
                 'auth.clickLinkToVerify',
-                'Click the link in the email to verify your account and log in.',
-              )}
-            </p>
-            <p className="mb-4 rounded-xl border border-warning-500/20 bg-warning-500/10 px-3 py-2 text-xs text-warning-400">
-              {t(
-                'auth.checkSpamFolder',
-                'Don\'t see the email? Check your Spam or Junk folder — and mark it as "Not spam" to help us.',
+                'Click the link in the email (check Spam folder) to verify your account and log in.',
               )}
             </p>
             <button
