@@ -910,6 +910,24 @@ export default function AdminUserDetail() {
     }
   };
 
+  const handleVerifyEmail = async () => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      const result = await adminUsersApi.verifyEmail(userId);
+      if (result.success) {
+        notify.success(`Email ${result.email} верифицирован`, 'Готово');
+        await loadUser();
+      } else {
+        notify.error(result.message || 'Ошибка верификации', 'Ошибка');
+      }
+    } catch {
+      notify.error('Ошибка верификации email', 'Ошибка');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const formatDate = (date: string | null) => {
     if (!date) return '-';
     return new Date(date).toLocaleDateString(locale, {
@@ -1348,6 +1366,21 @@ export default function AdminUserDetail() {
                     ? t('admin.users.detail.actions.areYouSure')
                     : t('admin.users.userActions.delete')}
                 </button>
+                {user.email && !user.email_verified && (
+                  <button
+                    onClick={() => handleInlineConfirm('verifyEmail', handleVerifyEmail)}
+                    disabled={actionLoading}
+                    className={`col-span-2 rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
+                      confirmingAction === 'verifyEmail'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
+                    }`}
+                  >
+                    {confirmingAction === 'verifyEmail'
+                      ? 'Точно верифицировать?'
+                      : `✉️ Верифицировать email (${user.email})`}
+                  </button>
+                )}
               </div>
             </div>
           </div>

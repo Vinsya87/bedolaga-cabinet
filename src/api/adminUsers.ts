@@ -646,4 +646,12 @@ export const adminUsersApi = {
     const response = await apiClient.get(`/cabinet/admin/users/${userId}/gifts`);
     return response.data;
   },
+
+  // Force-verify user email (admin action)
+  verifyEmail: async (
+    userId: number,
+  ): Promise<{ success: boolean; message: string; email: string }> => {
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/verify-email`);
+    return response.data;
+  },
 };
