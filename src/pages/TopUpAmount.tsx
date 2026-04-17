@@ -10,7 +10,7 @@ import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import { useHaptic, usePlatform } from '@/platform';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
-import type { PaymentMethod } from '../types';
+import type { PaymentMethod, PaymentMethodOption } from '../types';
 import BentoCard from '../components/ui/BentoCard';
 import { saveTopUpPendingInfo } from '../utils/topUpStorage';
 
@@ -80,6 +80,44 @@ const getMethodIcon = (methodId: string) => {
   return <CardIcon />;
 };
 
+const getPreferredOptionId = (options?: PaymentMethod['options']) => {
+  if (!options || options.length === 0) return null;
+
+  const sbpOption = options.find((option) => {
+    const normalizedId = option.id.toLowerCase();
+    const normalizedName = option.name.toLowerCase();
+    return (
+      normalizedId.includes('sbp') ||
+      normalizedName.includes('сбп') ||
+      normalizedName.includes('sbp')
+    );
+  });
+
+  return sbpOption?.id ?? options[0].id;
+};
+
+const sortOptionsWithSbpFirst = (options?: PaymentMethod['options']) => {
+  if (!options || options.length <= 1) return options ?? [];
+
+  const isPreferredOption = (option: PaymentMethodOption) => {
+    const normalizedId = option.id.toLowerCase();
+    const normalizedName = option.name.toLowerCase();
+    return (
+      normalizedId.includes('sbp') ||
+      normalizedName.includes('сбп') ||
+      normalizedName.includes('sbp')
+    );
+  };
+
+  return [...options].sort((left, right) => {
+    const leftIsPreferred = isPreferredOption(left);
+    const rightIsPreferred = isPreferredOption(right);
+
+    if (leftIsPreferred === rightIsPreferred) return 0;
+    return leftIsPreferred ? -1 : 1;
+  });
+};
+
 export default function TopUpAmount() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -88,7 +126,7 @@ export default function TopUpAmount() {
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
-  const { openInvoice, openTelegramLink, openLink } = usePlatform();
+  const { openInvoice, openTelegramLink, openLink, platform } = usePlatform();
   const haptic = useHaptic();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -135,7 +173,7 @@ export default function TopUpAmount() {
   const [amount, setAmount] = useState(getInitialAmount);
   const [error, setError] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(
-    method?.options && method.options.length > 0 ? method.options[0].id : null,
+    getPreferredOptionId(method?.options),
   );
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -153,6 +191,20 @@ export default function TopUpAmount() {
       navigate(`/balance/top-up${qs ? `?${qs}` : ''}`, { replace: true });
     }
   }, [cachedMethods, method, navigate, searchParams]);
+
+  useEffect(() => {
+    if (!method?.options || method.options.length === 0) {
+      if (selectedOption !== null) {
+        setSelectedOption(null);
+      }
+      return;
+    }
+
+    const optionExists = method.options.some((option) => option.id === selectedOption);
+    if (!optionExists) {
+      setSelectedOption(getPreferredOptionId(method.options));
+    }
+  }, [method?.id, method?.options, selectedOption]);
 
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
@@ -228,15 +280,16 @@ export default function TopUpAmount() {
     },
   });
 
-  // Auto-focus input
+  // Auto-focus input (only on desktop — mobile keyboard hides bottom nav)
   useEffect(() => {
+    if (platform === 'telegram') return;
     const timer = setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [platform]);
 
   if (!method) {
     return (
@@ -247,6 +300,7 @@ export default function TopUpAmount() {
   }
 
   const hasOptions = method.options && method.options.length > 0;
+  const orderedOptions = sortOptionsWithSbpFirst(method.options);
   const minRubles = method.min_amount_kopeks / 100;
   const maxRubles = method.max_amount_kopeks / 100;
   const methodKey = method.id.toLowerCase().replace(/-/g, '_');
@@ -343,11 +397,11 @@ export default function TopUpAmount() {
       </motion.div>
 
       {/* Payment options (if any) */}
-      {hasOptions && method.options && (
+      {hasOptions && orderedOptions.length > 0 && (
         <motion.div variants={staggerItem} className="space-y-2">
           <label className="text-sm font-medium text-dark-400">{t('balance.paymentMethod')}</label>
           <div className="grid grid-cols-2 gap-2">
-            {method.options.map((opt) => (
+            {orderedOptions.map((opt) => (
               <button
                 key={opt.id}
                 type="button"
@@ -399,7 +453,6 @@ export default function TopUpAmount() {
               placeholder="0"
               className="h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none"
               autoComplete="off"
-              autoFocus
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-semibold text-dark-500">
               {currencySymbol}

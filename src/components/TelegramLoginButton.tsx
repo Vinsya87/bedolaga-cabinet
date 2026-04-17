@@ -7,14 +7,14 @@ import { brandingApi, type TelegramWidgetConfig } from '../api/branding';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { useNavigate } from 'react-router';
-import { consumeCampaignSlug } from '../utils/campaign';
+import { getPendingCampaignSlug } from '../utils/campaign';
 import { copyToClipboard } from '../utils/clipboard';
 
 interface TelegramLoginButtonProps {
   referralCode?: string;
 }
 
-const SCRIPT_LOAD_TIMEOUT_MS = 8000;
+const SCRIPT_LOAD_TIMEOUT_MS = 2000;
 const DEEPLINK_POLL_INTERVAL_MS = 2500;
 
 export default function TelegramLoginButton({ referralCode }: TelegramLoginButtonProps) {
@@ -253,7 +253,7 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
       // bot users where referrals don't apply. Leaving it in localStorage allows
       // other auth methods (OIDC, widget) to pick it up if the user switches paths.
       if (!codesConsumedRef.current) {
-        capturedCampaignRef.current = consumeCampaignSlug();
+        capturedCampaignRef.current = getPendingCampaignSlug();
         codesConsumedRef.current = true;
       }
       const capturedCampaign = capturedCampaignRef.current;
