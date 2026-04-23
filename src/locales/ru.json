@@ -284,7 +284,8 @@
       "tariffs": "Тарифы",
       "traffic": "Трафик",
       "devices": "Устройства",
-      "expiredDate": "Истекла"
+      "expiredDate": "Истекла",
+      "activeUntil": "Активна до"
     },
     "suspended": {
       "title": "Подписка приостановлена",
@@ -582,8 +583,8 @@
       "unlimited": "Безлимит",
       "buyTrafficGb": "Купить {{gb}} ГБ",
       "buyUnlimited": "Купить Безлимит",
-      "manageServers": "Управление серверами",
-      "manageServersTitle": "Управление серверами"
+      "manageServers": "Управление сквадами",
+      "manageServersTitle": "Управление сквадами"
     },
     "serverManagement": {
       "statusLegend": "✅ — подключено • ➕ — будет добавлено (платно) • ➖ — будет отключено",
@@ -683,6 +684,9 @@
       },
       "rollypay": {
         "description": "Оплата через RollyPay (СБП)"
+      },
+      "aurapay": {
+        "description": "Оплата через AuraPay"
       }
     },
     "transactionHistory": "История операций",
@@ -1117,7 +1121,7 @@
       "apps": "Приложения",
       "wheel": "Колесо",
       "tariffs": "Тарифы",
-      "servers": "Серверы",
+      "servers": "Сквады",
       "banSystem": "Мониторинг банов",
       "broadcasts": "Рассылки",
       "users": "Пользователи",
@@ -1980,6 +1984,7 @@
         "payments_severpay": "SeverPay",
         "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
+        "payments_aurapay": "AuraPay",
         "subs_core": "Основные",
         "subs_trial": "Пробный период",
         "subs_pricing": "Цены",
@@ -2852,8 +2857,8 @@
       }
     },
     "servers": {
-      "title": "Управление серверами",
-      "subtitle": "Настройка серверов VPN",
+      "title": "Управление сквадами",
+      "subtitle": "Настройка сквадов",
       "sync": "Синхронизировать",
       "syncing": "Синхронизация...",
       "syncNow": "Синхронизировать сейчас",
