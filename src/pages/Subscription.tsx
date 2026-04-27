@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { WebBackButton } from '../components/WebBackButton';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
@@ -925,33 +925,77 @@ export default function Subscription() {
 
               {/* ─── Subscription URL ─── */}
               {displayedConnectionUrl && !shouldHideConnectionLink && (
-                <div className="mb-5 flex gap-2">
-                  <code
-                    className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-50/30"
-                    style={{
-                      background: g.codeBg,
-                      border: `1px solid ${g.codeBorder}`,
-                    }}
-                    title={displayedConnectionUrl}
-                  >
-                    {displayedConnectionUrl}
-                  </code>
-                  <button
-                    onClick={copyUrl}
-                    className="flex h-auto items-center rounded-[10px] px-3 transition-colors duration-300"
-                    style={{
-                      background: copied ? 'rgba(var(--color-accent-400), 0.12)' : g.innerBorder,
-                      border: copied
-                        ? '1px solid rgba(var(--color-accent-400), 0.2)'
-                        : `1px solid ${g.trackBg}`,
-                      color: copied ? 'rgb(var(--color-accent-400))' : g.textMuted,
-                    }}
-                    title={t('subscription.copyLink')}
-                  >
-                    {copied ? <CheckIcon /> : <CopyIcon />}
-                  </button>
+                <div className="mb-5">
+                  {/* Заголовок ссылки */}
+                  <div className="mb-2 flex items-center gap-2">
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: 'rgb(var(--color-accent-400))' }}
+                    >
+                      🔗 Ваша ссылка для VPN-приложения
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <code
+                      className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-50/30"
+                      style={{
+                        background: g.codeBg,
+                        border: `1px solid ${g.codeBorder}`,
+                      }}
+                      title={displayedConnectionUrl}
+                    >
+                      {displayedConnectionUrl}
+                    </code>
+                    <button
+                      onClick={copyUrl}
+                      className="flex h-auto items-center rounded-[10px] px-3 transition-colors duration-300"
+                      style={{
+                        background: copied ? 'rgba(var(--color-accent-400), 0.12)' : g.innerBorder,
+                        border: copied
+                          ? '1px solid rgba(var(--color-accent-400), 0.2)'
+                          : `1px solid ${g.trackBg}`,
+                        color: copied ? 'rgb(var(--color-accent-400))' : g.textMuted,
+                      }}
+                      title={t('subscription.copyLink')}
+                    >
+                      {copied ? <CheckIcon /> : <CopyIcon />}
+                    </button>
+                  </div>
+                  {/* Подсказка */}
+                  <p className="mt-1.5 text-xs" style={{ color: g.textMuted }}>
+                    Скопируйте ссылку и вставьте в VPN-приложение → «Как подключить VPN?»
+                  </p>
                 </div>
               )}
+
+              {/* ─── Как подключить VPN ─── */}
+              <Link
+                to={`/connection?sub=${subscriptionId}`}
+                className="mb-5 flex items-center gap-4 rounded-2xl border-2 border-accent-500/40 bg-accent-500/10 px-5 py-4 transition-all hover:border-accent-500/70 hover:bg-accent-500/15"
+              >
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-accent-500/20 text-2xl">
+                  📱
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-bold text-dark-50">Как подключить VPN?</p>
+                  <p className="mt-0.5 text-sm text-dark-400">
+                    Пошаговая инструкция — скачать и настроить
+                  </p>
+                </div>
+                <svg
+                  className="h-5 w-5 flex-shrink-0 text-accent-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </Link>
 
               {/* ─── Countdown ─── */}
               <div className="mb-5">

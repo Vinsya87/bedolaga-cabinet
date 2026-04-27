@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,8 @@ import { subscriptionApi } from '../api/subscription';
 import { referralApi } from '../api/referral';
 import { balanceApi } from '../api/balance';
 import { wheelApi } from '../api/wheel';
-import Onboarding, { useOnboarding } from '../components/Onboarding';
+import { useOnboarding } from '../components/Onboarding';
+import OnboardingWizard from '../components/OnboardingWizard';
 import PromoOffersSection from '../components/PromoOffersSection';
 import NewsSection from '../components/news/NewsSection';
 import SubscriptionCardActive from '../components/dashboard/SubscriptionCardActive';
@@ -20,6 +21,7 @@ import { promoApi } from '../api/promo';
 import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import { API } from '../config/constants';
+import PromoCodeBanner from '../components/dashboard/PromoCodeBanner';
 
 const ChevronRightIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -205,40 +207,6 @@ export default function Dashboard() {
     }
   }, [isOnboardingCompleted, subLoading, refLoading, blockingType]);
 
-  const onboardingSteps = useMemo(() => {
-    type Placement = 'top' | 'bottom' | 'left' | 'right';
-    const steps: Array<{
-      target: string;
-      title: string;
-      description: string;
-      placement: Placement;
-    }> = [
-      {
-        target: 'welcome',
-        title: t('onboarding.steps.welcome.title'),
-        description: t('onboarding.steps.welcome.description'),
-        placement: 'bottom',
-      },
-      {
-        target: 'balance',
-        title: t('onboarding.steps.balance.title'),
-        description: t('onboarding.steps.balance.description'),
-        placement: 'bottom',
-      },
-    ];
-
-    if (subscription?.subscription_url) {
-      steps.splice(1, 0, {
-        target: 'connect-devices',
-        title: t('onboarding.steps.connectDevices.title'),
-        description: t('onboarding.steps.connectDevices.description'),
-        placement: 'bottom',
-      });
-    }
-
-    return steps;
-  }, [t, subscription]);
-
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
     completeOnboarding();
@@ -363,6 +331,34 @@ export default function Dashboard() {
         />
       )}
 
+      {/* Promo Code Banner */}
+      <PromoCodeBanner />
+
+      {/* Как подключить VPN — только для single-tariff (в multi-tariff кнопка внутри каждой карточки) */}
+      {!isMultiTariff && subscription && (
+        <Link
+          to={`/connection?sub=${subscription.id}`}
+          className="flex items-center gap-4 rounded-2xl bg-gradient-to-r from-accent-500 to-blue-500 px-5 py-4 shadow-md shadow-accent-500/20 transition-all hover:shadow-lg hover:shadow-accent-500/30"
+        >
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-white/20 text-2xl">
+            📱
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-lg font-bold text-white">Как подключить VPN?</p>
+            <p className="text-sm text-white/80">Пошаговая инструкция — скачать и настроить</p>
+          </div>
+          <svg
+            className="h-5 w-5 flex-shrink-0 text-white/70"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+        </Link>
+      )}
+
       {/* Promo Offers */}
       <PromoOffersSection />
 
@@ -393,12 +389,11 @@ export default function Dashboard() {
       {/* News Section */}
       <NewsSection />
 
-      {/* Onboarding Tutorial */}
+      {/* Onboarding Wizard */}
       {showOnboarding && (
-        <Onboarding
-          steps={onboardingSteps}
+        <OnboardingWizard
           onComplete={handleOnboardingComplete}
-          onSkip={handleOnboardingComplete}
+          subscriptionId={subscription?.id ?? multiSubData?.subscriptions?.[0]?.id}
         />
       )}
     </div>

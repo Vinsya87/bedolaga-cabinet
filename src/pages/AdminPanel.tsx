@@ -1063,8 +1063,8 @@ export default function AdminPanel() {
           className="group flex w-full flex-col items-start justify-between gap-4 rounded-xl border border-fuchsia-500/20 bg-gradient-to-r from-fuchsia-500/10 to-pink-500/5 p-5 shadow-[0_0_15px_rgba(217,70,239,0.05)] transition-all duration-300 hover:border-fuchsia-500/40 hover:from-fuchsia-500/15 hover:to-pink-500/10 hover:shadow-[0_0_25px_rgba(217,70,239,0.15)] sm:flex-row sm:items-center"
         >
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-fuchsia-500/20 text-fuchsia-400">
-              <SparklesIcon />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-fuchsia-500/20 text-fuchsia-400 [&>svg]:h-6 [&>svg]:w-6">
+              {icons.sparkle}
             </div>
             <div>
               <h3 className="bg-gradient-to-r from-fuchsia-400 to-pink-400 bg-clip-text text-lg font-bold text-transparent transition-colors group-hover:text-fuchsia-300">
@@ -1075,8 +1075,8 @@ export default function AdminPanel() {
               </p>
             </div>
           </div>
-          <div className="flex shrink-0 items-center justify-center rounded-full bg-dark-800 p-2 text-dark-400 transition-colors group-hover:bg-fuchsia-500/20 group-hover:text-fuchsia-400 sm:ml-4">
-            <ChevronRightIcon />
+          <div className="flex shrink-0 items-center justify-center rounded-full bg-dark-800 p-2 text-dark-400 transition-colors group-hover:bg-fuchsia-500/20 group-hover:text-fuchsia-400 sm:ml-4 [&>svg]:h-5 [&>svg]:w-5">
+            {icons.chevron}
           </div>
         </Link>
       </div>

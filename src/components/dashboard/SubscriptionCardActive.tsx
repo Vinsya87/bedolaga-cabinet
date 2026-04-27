@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { Link } from 'react-router';
@@ -63,6 +64,15 @@ export default function SubscriptionCardActive({
 
   const isAtDeviceLimit =
     subscription.device_limit > 0 && connectedDevices >= subscription.device_limit;
+
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    if (!subscription.subscription_url) return;
+    navigator.clipboard.writeText(subscription.subscription_url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const formattedDate = new Date(subscription.end_date).toLocaleDateString();
   const daysLeft = subscription.days_left;
@@ -306,6 +316,50 @@ export default function SubscriptionCardActive({
             </div>
           )}
         </HoverBorderGradient>
+      )}
+
+      {/* ─── Subscription URL ─── */}
+      {subscription.subscription_url && (
+        <div
+          className="mb-3 overflow-hidden rounded-[14px]"
+          style={{ background: g.innerBg, border: `1px solid ${g.innerBorder}` }}
+        >
+          <div
+            className="flex items-center gap-1.5 px-3.5 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: `rgba(${zone.mainVarRaw}, 0.7)` }}
+          >
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            Ваша VPN-ссылка
+          </div>
+          <div className="flex items-center gap-2 px-3.5 pb-3">
+            <p className="flex-1 truncate font-mono text-[11px] text-dark-50/40">
+              {subscription.subscription_url}
+            </p>
+            <button
+              onClick={handleCopy}
+              className="flex-shrink-0 rounded-[8px] px-2.5 py-1.5 text-[11px] font-semibold transition-all"
+              style={{
+                background: copied ? 'rgba(34,197,94,0.12)' : `rgba(${zone.mainVarRaw}, 0.10)`,
+                color: copied ? 'rgb(34,197,94)' : zone.mainVar,
+              }}
+            >
+              {copied ? '✓ Скопировано' : 'Копировать'}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* ─── Stats row: Tariff + Days Left ─── */}

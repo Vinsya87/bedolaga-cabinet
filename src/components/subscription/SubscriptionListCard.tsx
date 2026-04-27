@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { useTheme } from '../../hooks/useTheme';
 import { getGlassColors } from '../../utils/glassTheme';
 import { useHaptic } from '../../platform';
@@ -75,10 +77,20 @@ export default function SubscriptionListCard({
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
   const { impact } = useHaptic();
+  const [copied, setCopied] = useState(false);
 
   const handleClick = () => {
     impact('light');
     onClick();
+  };
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!subscription.subscription_url) return;
+    navigator.clipboard.writeText(subscription.subscription_url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const isTrial = subscription.is_trial;
@@ -227,6 +239,69 @@ export default function SubscriptionListCard({
             );
           })()}
       </div>
+
+      {/* VPN-ссылка + кнопка подключения */}
+      {isActive && subscription.subscription_url && (
+        <div className="mt-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+          {/* URL с копированием */}
+          <div
+            className="flex items-center gap-2 rounded-xl px-3 py-2"
+            style={{ background: g.innerBg, border: `1px solid ${g.innerBorder}` }}
+          >
+            <svg
+              className="h-3 w-3 shrink-0 opacity-40"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            <span
+              className="flex-1 truncate font-mono text-[11px]"
+              style={{ color: g.textSecondary }}
+            >
+              {subscription.subscription_url}
+            </span>
+            <button
+              onClick={handleCopy}
+              className="shrink-0 rounded-lg px-2 py-1 text-[11px] font-semibold transition-all"
+              style={{
+                background: copied ? 'rgba(34,197,94,0.12)' : 'rgba(var(--color-accent-500),0.12)',
+                color: copied ? 'rgb(34,197,94)' : 'rgb(var(--color-accent-400))',
+              }}
+            >
+              {copied ? '✓ Скопировано' : 'Копировать'}
+            </button>
+          </div>
+
+          {/* Кнопка "Как подключить VPN?" */}
+          <Link
+            to={`/connection?sub=${subscription.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all hover:opacity-90"
+            style={{
+              background:
+                'linear-gradient(to right, rgb(var(--color-accent-500)), rgb(59,130,246))',
+            }}
+          >
+            <span>📱</span>
+            Как подключить VPN?
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </Link>
+        </div>
+      )}
     </button>
   );
 }
