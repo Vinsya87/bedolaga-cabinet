@@ -214,8 +214,8 @@ export default function Dashboard() {
   }, [isOnboardingCompleted, subLoading, refLoading, blockingType]);
 
   const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
     completeOnboarding();
+    setShowOnboarding(false);
   };
 
   return (
