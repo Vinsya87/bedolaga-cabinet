@@ -399,6 +399,17 @@ export default function AdminUserDetail() {
     }
   };
 
+  const handleVerifyEmail = async () => {
+    if (!userId) return;
+    try {
+      const result = await adminUsersApi.verifyEmail(userId);
+      notify.success(`Email ${result.email} верифицирован`, 'Готово');
+      await loadUser();
+    } catch {
+      notify.error('Ошибка верификации email', 'Ошибка');
+    }
+  };
+
   const handleSyncFromPanel = async () => {
     if (!userId) return;
     setActionLoading(true);
@@ -832,6 +843,7 @@ export default function AdminUserDetail() {
             actionLoading={actionLoading}
             onBlockUser={handleBlockUser}
             onUnblockUser={handleUnblockUser}
+            onVerifyEmail={handleVerifyEmail}
             confirmingAction={confirmingAction}
             onInlineConfirm={handleInlineConfirm}
             onResetTrial={handleResetTrial}

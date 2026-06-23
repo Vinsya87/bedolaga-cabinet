@@ -78,6 +78,7 @@ export interface InfoTabProps {
   actionLoading: boolean;
   onBlockUser: () => void;
   onUnblockUser: () => void;
+  onVerifyEmail: () => Promise<void>;
 
   // Destructive actions + inline-confirm armer
   confirmingAction: string | null;
@@ -116,6 +117,7 @@ export function InfoTab(props: InfoTabProps) {
     actionLoading,
     onBlockUser,
     onUnblockUser,
+    onVerifyEmail,
     confirmingAction,
     onInlineConfirm,
     onResetTrial,
@@ -156,6 +158,17 @@ export function InfoTab(props: InfoTabProps) {
         <div className="rounded-xl bg-dark-800/50 p-3">
           <div className="mb-1 text-xs text-dark-500">Email</div>
           <div className="text-dark-100">{user.email || '-'}</div>
+          {user.email && !user.email_verified && (
+            <button
+              onClick={() => onInlineConfirm('verifyEmail', onVerifyEmail)}
+              disabled={actionLoading}
+              className="mt-2 w-full rounded-lg border border-success-500/30 bg-success-500/10 px-2 py-1 text-xs font-medium text-success-400 transition-colors hover:bg-success-500/20 disabled:opacity-50"
+            >
+              {confirmingAction === 'verifyEmail'
+                ? t('common.confirm', 'Точно?')
+                : '✉️ Верифицировать email'}
+            </button>
+          )}
         </div>
         <div className="rounded-xl bg-dark-800/50 p-3">
           <div className="mb-1 text-xs text-dark-500">{t('admin.users.detail.language')}</div>
