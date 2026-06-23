@@ -51,3 +51,8 @@ CLAUDE.md
 
 # Dynamic SEO content
 public/seo_data.json
+
+# Impeccable design context (local only, not for shared repo)
+PRODUCT.md
+DESIGN.md
+DESIGN.json
