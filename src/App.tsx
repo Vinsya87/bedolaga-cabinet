@@ -184,6 +184,25 @@ function ProtectedRoute({
   return withLayout ? <Layout>{children}</Layout> : <>{children}</>;
 }
 
+// Корневой роут «/»: для неавторизованных рендерим форму входа ПРЯМО здесь,
+// не меняя URL (никакого редиректа на «/login»). Голый https://freeloft.su/ —
+// и лицо проекта, и точка входа. «/login» остаётся рабочим алиасом для прямых
+// ссылок и возврата после авторизации (returnUrl сохраняется в ProtectedRoute).
+function RootGate({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isLoading = useAuthStore((state) => state.isLoading);
+
+  if (isLoading) {
+    return <PageLoader variant="dark" />;
+  }
+
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  return <Layout>{children}</Layout>;
+}
+
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const isLoading = useAuthStore((state) => state.isLoading);
@@ -315,11 +334,11 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
+            <RootGate>
               <LazyPage>
                 <Dashboard />
               </LazyPage>
-            </ProtectedRoute>
+            </RootGate>
           }
         />
         <Route
